@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CivicTwin X — AI-Powered City Digital Twin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --emergency: #ff0066;
+      --critical: #ff4444;
+      --high: #ffaa00;
+      --medium: #ffcc00;
+      --low: #00aaff;
+      --optimal: #00cc88;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(ellipse at center, #001b44 0%, #000428 100%);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .cyber-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(90deg, transparent 95%, rgba(0, 255, 255, 0.03) 100%),
+        linear-gradient(transparent 95%, rgba(0, 255, 255, 0.03) 100%);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      position: relative;
+    }
+
+    .cyber-glitch {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #00ffff;
+      text-shadow: 
+        0 0 10px #00ffff,
+        0 0 20px #00ffff,
+        0 0 30px #00aaff;
+      animation: glitch 3s infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      5% { transform: translate(-2px, 2px); }
+      10% { transform: translate(2px, -2px); }
+      15% { transform: translate(-2px, -2px); }
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-bottom: 30px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 255, 255, 0.2);
+    }
+
+    .card h3 {
+      color: #00ffff;
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 12px;
+      color: white;
+      padding: 12px;
+      text-align: center;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      outline: none;
+      background: rgba(0, 255, 255, 0.15);
+      border-color: #00ffff;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #00ffff, #0099ff);
+      border: none;
+      color: #000;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      margin: 5px;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.4);
+    }
+
+    .btn-emergency {
+      background: linear-gradient(45deg, #ff0066, #ff4444);
+    }
+
+    .result-panel {
+      margin-top: 30px;
+      display: none;
+    }
+
+    .alert-banner {
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .alert-emergency { background: var(--emergency); }
+    .alert-critical { background: var(--critical); }
+    .alert-high { background: var(--high); color: #000; }
+    .alert-medium { background: var(--medium); color: #000; }
+    .alert-low { background: var(--low); }
+    .alert-optimal { background: var(--optimal); }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin: 25px 0;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border-left: 4px solid #00ffff;
+    }
+
+    .ai-insights {
+      background: rgba(0, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+    }
+
+    .blockchain-badge {
+      background: rgba(255, 215, 0, 0.2);
+      border: 1px solid gold;
+      padding: 10px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      margin-top: 15px;
+    }
+
+    .visualization-container {
+      height: 300px;
+      margin-top: 20px;
+    }
+
+    .feature-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      background: rgba(0, 255, 255, 0.2);
+      border-color: #00ffff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .citizen-report-form {
+      display: grid;
+      gap: 15px;
+    }
+
+    .report-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 10px;
+      color: white;
+      padding: 12px;
+      font-family: inherit;
+    }
+
+    .report-input:focus {
+      outline: none;
+      border-color: #00ffff;
+    }
+
+    .urgency-slider {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .floating-elements {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .floating-element {
+      position: absolute;
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(100px, 100px) rotate(360deg); }
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success { background: var(--optimal); }
+    .notification.error { background: var(--critical); }
+    .notification.warning { background: var(--high); color: #000; }
+
+    /* Pulse animations for different alert levels */
+    @keyframes pulse-emergency {
+      0%, 100% { box-shadow: 0 0 20px var(--emergency); }
+      50% { box-shadow: 0 0 40px var(--emergency); }
+    }
+
+    @keyframes pulse-critical {
+      0%, 100% { box-shadow: 0 0 15px var(--critical); }
+      50% { box-shadow: 0 0 30px var(--critical); }
+    }
+
+    .pulse-emergency { animation: pulse-emergency 1s infinite; }
+    .pulse-critical { animation: pulse-critical 1.5s infinite; }
+    .pulse-high { animation: pulse 2s infinite; }
+  </style>
+</head>
+<body>
+  <div class="cyber-grid"></div>
+  <div class="floating-elements" id="floatingElements"></div>
+  <div id="notification" class="notification"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1 class="cyber-glitch">🌐 CIVICTWIN X</h1>
+      <p class="tagline">"AI-Powered Digital Twin • Blockchain-Verified • Real-Time Urban Intelligence"</p>
+    </div>
+
+    <div class="feature-tabs">
+      <button class="tab-btn active" onclick="switchTab('analysis')">🏙️ City Analysis</button>
+      <button class="tab-btn" onclick="switchTab('environment')">🌡️ Environment</button>
+      <button class="tab-btn" onclick="switchTab('reporting')">📝 Citizen Reporting</button>
+      <button class="tab-btn" onclick="switchTab('blockchain')">⛓️ Data Integrity</button>
+      <button class="tab-btn" onclick="switchTab('historical')">📊 Historical Data</button>
+    </div>
+
+    <!-- Analysis Tab -->
+    <div id="analysis" class="tab-content active">
+      <div class="dashboard-grid">
+        <div class="card">
+          <h3><i class="fas fa-city"></i> City Health Input</h3>
+          <form id="cityForm">
+            <div class="input-grid">
+              <input type="number" name="traffic" placeholder="🚗 Traffic" class="input-field" min="0" max="100" required>
+              <input type="number" name="pollution" placeholder="🌫️ Pollution" class="input-field" min="0" max="100" required>
+              <input type="number" name="power_usage" placeholder="⚡ Power Usage" class="input-field" min="0" max="100" required>
+              <input type="number" name="water_use" placeholder="💧 Water Use" class="input-field" min="0" max="100" required>
+              <input type="number" name="complaints" placeholder="📢 Complaints" class="input-field" min="0" max="100" required>
+            </div>
+            <button type="submit" class="btn"><i class="fas fa-brain"></i> AI Analysis</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-map-marker-alt"></i> Location Intelligence</h3>
+          <p>Get real-time environmental data for your location</p>
+          <button id="locationBtn" class="btn"><i class="fas fa-satellite"></i> Scan My Location</button>
+          <div id="locationResult" style="margin-top: 15px;"></div>
+        </div>
+      </div>
+
+      <div id="result" class="result-panel">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+    </div>
+
+    <!-- Environment Tab -->
+    <div id="environment" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-wind"></i> Environmental Monitoring</h3>
+        <div id="envData" class="metrics-grid">
+          <div class="metric-card">
+            <h4>Air Quality Index</h4>
+            <div style="font-size: 2rem; color: #00cc88;">--</div>
+            <div>Waiting for data...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Citizen Reporting Tab -->
+    <div id="reporting" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-bullhorn"></i> Citizen Issue Reporting</h3>
+        <form id="reportForm" class="citizen-report-form">
+          <select name="type" class="report-input" required>
+            <option value="">Select Issue Type</option>
+            <option value="traffic">Traffic Congestion</option>
+            <option value="pollution">Air Pollution</option>
+            <option value="infrastructure">Infrastructure</option>
+            <option value="waste">Waste Management</option>
+            <option value="noise">Noise Pollution</option>
+            <option value="other">Other</option>
+          </select>
+          <textarea name="description" placeholder="Describe the issue..." class="report-input" rows="4" required></textarea>
+          <input type="text" name="location" placeholder="Location (optional)" class="report-input">
+          <div>
+            <label>Urgency Level: <span id="urgencyValue">5</span>/10</label>
+            <input type="range" name="urgency" class="urgency-slider" min="1" max="10" value="5">
+          </div>
+          <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> Submit Report</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Blockchain Tab -->
+    <div id="blockchain" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-link"></i> Data Integrity Blockchain</h3>
+        <div id="blockchainData">
+          <p>Loading blockchain data...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historical Data Tab -->
+    <div id="historical" class="tab-content">
+      <div class="card">
+        <h3><i class="fas fa-chart-line"></i> Historical Trends</h3>
+        <div class="visualization-container">
+          <canvas id="historyChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create floating background elements
+    for (let i = 0; i < 20; i++) {
+      const el = document.createElement('div');
+      el.className = 'floating-element';
+      el.style.width = Math.random() * 100 + 50 + 'px';
+      el.style.height = el.style.width;
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = Math.random() * 100 + 'vh';
+      el.style.animationDelay = Math.random() * 20 + 's';
+      el.style.animationDuration = (Math.random() * 30 + 20) + 's';
+      document.getElementById('floatingElements').appendChild(el);
+    }
+
+    let historyChart = null;
+
+    // Notification system
+    function showNotification(message, type = 'info') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type} show`;
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 4000);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabName === 'historical') {
+        loadHistoricalData();
+      } else if (tabName === 'blockchain') {
+        loadBlockchainData();
+      }
+    }
+
+    // Enhanced form submission with error handling
+document.getElementById('cityForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  console.log("Form data:", data); // Debug
+  
+  // Validate all fields have values
+  for (let key in data) {
+    if (!data[key] || data[key] === '') {
+      showNotification('Please fill all fields with values 0-100', 'error');
+      return;
+    }
+    const value = parseFloat(data[key]);
+    if (isNaN(value) || value < 0 || value > 100) {
+      showNotification('Values must be numbers between 0-100', 'error');
+      return;
+    }
+  }
+
+  showNotification('Analyzing city data...', 'warning');
+
+  try {
+    const res = await fetch('/analyze', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        traffic: parseFloat(data.traffic),
+        pollution: parseFloat(data.pollution),
+        power_usage: parseFloat(data.power_usage), 
+        water_use: parseFloat(data.water_use),
+        complaints: parseFloat(data.complaints)
+      })
+    });
+
+    console.log("Response status:", res.status); // Debug
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Server error: ${res.status} - ${errorText}`);
+    }
+
+    const result = await res.json();
+    console.log("Result:", result); // Debug
+    
+    if (result.error) {
+      showNotification('Analysis error: ' + result.error, 'error');
+    } else {
+      showAdvancedResult(result);
+      showNotification('Analysis complete!', 'success');
+    }
+  } catch (error) {
+    console.error('Fetch error:', error);
+    showNotification('Failed to connect to server. Make sure Flask is running on port 5000.', 'error');
+  }
+});
+
+    // Location-based prediction
+    document.getElementById('locationBtn').addEventListener('click', async () => {
+      if (navigator.geolocation) {
+        showNotification('Scanning your location...', 'warning');
+        navigator.geolocation.getCurrentPosition(async pos => {
+          try {
+            const res = await fetch('/location_predict', {
+              method: 'POST',
+              headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({ 
+                lat: pos.coords.latitude, 
+                lon: pos.coords.longitude 
+              })
+            });
+            const data = await res.json();
+            if (data.error) {
+              showNotification('⚠️ ' + data.error, 'error');
+              return;
+            }
+            showEnvironmentalData(data);
+            showNotification('Location data loaded successfully!', 'success');
+          } catch (error) {
+            showNotification('Error fetching location data', 'error');
+          }
+        }, () => showNotification('Unable to get your location.', 'error'));
+      } else {
+        showNotification('Geolocation not supported.', 'error');
+      }
+    });
+
+    // Citizen reporting
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('/citizen_report', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+        if (result.status === 'success') {
+          showNotification('Report submitted successfully!', 'success');
+          e.target.reset();
+          document.getElementById('urgencyValue').textContent = '5';
+        }
+      } catch (error) {
+        showNotification('Error submitting report', 'error');
+      }
+    });
+
+    // Urgency slider
+    document.querySelector('.urgency-slider').addEventListener('input', (e) => {
+      document.getElementById('urgencyValue').textContent = e.target.value;
+    });
+
+    function showAdvancedResult(result) {
+      const resultBox = document.getElementById('result');
+      resultBox.style.display = 'block';
+      
+      const alertClass = `alert-${result.alert_level || 'medium'}`;
+      const pulseClass = `pulse-${result.alert_level}`;
+      
+      resultBox.innerHTML = `
+        <div class="alert-banner ${alertClass} ${pulseClass}">
+          <h2>${result.prediction}</h2>
+          <p>Civic Stress Level: <strong>${result.civic_stress}/100</strong></p>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h4>AI Confidence</h4>
+            <div style="font-size: 2rem; color: #00ffff;">${result.confidence}%</div>
+          </div>
+          <div class="metric-card">
+            <h4>Alert Level</h4>
+            <div style="font-size: 1.5rem; color: var(--${result.alert_level})">
+              ${result.alert_level.toUpperCase()}
+            </div>
+          </div>
+          <div class="metric-card">
+            <h4>Data Integrity</h4>
+            <div style="font-size: 1.2rem;">🔗 Blockchain Verified</div>
+          </div>
+        </div>
+
+        <div class="ai-insights">
+          <h4><i class="fas fa-robot"></i> AI Predictions & Insights</h4>
+          <div style="margin: 15px 0;">
+            <strong>Trend Forecast:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              ${result.ai_analysis.insights.map(insight => `<li>${insight}</li>`).join('')}
+            </ul>
+          </div>
+          <p><strong>Prediction Confidence:</strong> ${result.ai_analysis.confidence}%</p>
+        </div>
+
+        <div class="card">
+          <h4><i class="fas fa-lightbulb"></i> Recommended Actions</h4>
+          <ul style="margin: 15px 0; padding-left: 20px;">
+            ${result.tips.map(tip => `<li style="margin: 8px 0;">${tip}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="blockchain-badge">
+          <strong>Blockchain Hash:</strong> ${result.block_hash}<br>
+          <strong>Timestamp:</strong> ${result.timestamp}
+        </div>
+      `;
+
+      // Text-to-speech
+      if ('speechSynthesis' in window) {
+        const speech = new SpeechSynthesisUtterance(result.prediction);
+        speech.rate = 0.9;
+        window.speechSynthesis.speak(speech);
+      }
+    }
+
+    function showEnvironmentalData(data) {
+      const envTab = document.getElementById('envData');
+      envTab.innerHTML = `
+        <div class="metric-card">
+          <h4>Air Quality Index</h4>
+          <div style="font-size: 2rem; color: ${getAQIColor(data.aqi_level)}">${data.environment.overall.toFixed(1)}</div>
+          <div>${data.status}</div>
+        </div>
+        <div class="metric-card">
+          <h4>PM2.5</h4>
+          <div style="font-size: 1.5rem;">${data.environment.pm2_5.toFixed(1)}</div>
+          <div>µg/m³</div>
+        </div>
+        <div class="metric-card">
+          <h4>Temperature</h4>
+          <div style="font-size: 1.5rem;">${data.environment.temperature?.toFixed(1) || 'N/A'}°C</div>
+        </div>
+        <div class="metric-card">
+          <h4>Humidity</h4>
+          <div style="font-size: 1.5rem;">${data.environment.humidity || 'N/A'}%</div>
+        </div>
+        <div class="metric-card">
+          <h4>Wind Speed</h4>
+          <div style="font-size: 1.5rem;">${data.environment.wind_speed?.toFixed(1) || 'N/A'} km/h</div>
+        </div>
+        <div class="metric-card">
+          <h4>Ozone</h4>
+          <div style="font-size: 1.5rem;">${data.environment.ozone?.toFixed(1) || 'N/A'}</div>
+          <div>ppb</div>
+        </div>
+        ${data.insights && data.insights.length > 0 ? `
+          <div class="card" style="grid-column: 1 / -1;">
+            <h4>Environmental Insights</h4>
+            <ul>${data.insights.map(i => `<li>${i}</li>`).join('')}</ul>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function getAQIColor(level) {
+      const colors = {
+        'excellent': '#00cc88',
+        'good': '#00aaff',
+        'moderate': '#ffcc00',
+        'unhealthy': '#ff4444',
+        'hazardous': '#ff0066'
+      };
+      return colors[level] || '#00ffff';
+    }
+
+    async function loadBlockchainData() {
+      try {
+        const res = await fetch('/blockchain_data');
+        const data = await res.json();
+        
+        const blockchainDiv = document.getElementById('blockchainData');
+        blockchainDiv.innerHTML = `
+          <h4>Recent Blockchain Entries</h4>
+          <div style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
+            ${data.blockchain.map(block => `
+              <div class="blockchain-badge" style="margin: 10px 0; text-align: left;">
+                <strong>Hash:</strong> ${block.hash}<br>
+                <strong>Previous:</strong> ${block.previous_hash}<br>
+                <strong>Time:</strong> ${new Date(block.timestamp).toLocaleString()}<br>
+                <strong>Data:</strong> ${JSON.stringify(block.data).substring(0, 100)}...
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('blockchainData').innerHTML = '<p>Error loading blockchain data</p>';
+      }
+    }
+
+    async function loadHistoricalData() {
+      try {
+        const res = await fetch('/historical_data');
+        const data = await res.json();
+        
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        
+        if (historyChart) {
+          historyChart.destroy();
+        }
+        
+        const labels = data.historical_data.map(item => 
+          new Date(item[0]).toLocaleTimeString()
+        ).reverse();
+        
+        const stressData = data.historical_data.map(item => item[1]).reverse();
+        const trafficData = data.historical_data.map(item => item[2]).reverse();
+        const pollutionData = data.historical_data.map(item => item[3]).reverse();
+        
+        historyChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Civic Stress',
+                data: stressData,
+                borderColor: '#00ffff',
+                backgroundColor: 'rgba(0, 255, 255, 0.1)',
+                tension: 0.4
+              },
+              {
+                label: 'Traffic',
+                data: trafficData,
+                borderColor: '#ffaa00',
+                backgroundColor: 'rgba(255, 170, 0, 0.1)',
+                tension: 0.4
+              },
+              {
+                label: 'Pollution',
+                data: pollutionData,
+                borderColor: '#ff4444',
+                backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                tension: 0.4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: {
+                  color: 'white'
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: 'white'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: 'white',
+                  maxTicksLimit: 8
+                }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        document.getElementById('historyChart').innerHTML = '<p>Error loading historical data</p>';
+      }
+    }
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      showNotification('Welcome to CivicTwin X! Ready to analyze your city.', 'success');
+    });
+  </script>
+</body>
+</html>

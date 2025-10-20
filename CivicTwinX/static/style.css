@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: radial-gradient(circle at center, #020024, #090979, #00d4ff);
+  color: white;
+  overflow: hidden;
+}
+
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: url('https://i.ibb.co/7t9y6bR/grid.png');
+  opacity: 0.05;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-top: 10vh;
+}
+
+input {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  border: none;
+  width: 150px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background: #00e5ff;
+  border-radius: 20px;
+  cursor: pointer;
+  color: #000;
+  margin: 10px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #00b3ff;
+}
+
+#output {
+  margin-top: 20px;
+  font-size: 1.3em;
+  color: #0ff;
+  animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px #0ff; }
+  to { text-shadow: 0 0 20px #00e5ff; }
+}

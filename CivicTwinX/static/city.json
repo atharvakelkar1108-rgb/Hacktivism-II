@@ -1,0 +1,55 @@
+{
+  "city_name": "NeoPune",
+  "zones": [
+    {
+      "id": 1,
+      "name": "Central District",
+      "coordinates": [18.5204, 73.8567],
+      "traffic": 87,
+      "pollution": 92,
+      "power_usage": 78,
+      "water_use": 69,
+      "complaints": 45
+    },
+    {
+      "id": 2,
+      "name": "Green Valley",
+      "coordinates": [18.5315, 73.845],
+      "traffic": 32,
+      "pollution": 25,
+      "power_usage": 41,
+      "water_use": 58,
+      "complaints": 12
+    },
+    {
+      "id": 3,
+      "name": "Industrial Belt",
+      "coordinates": [18.5052, 73.8905],
+      "traffic": 76,
+      "pollution": 84,
+      "power_usage": 93,
+      "water_use": 88,
+      "complaints": 57
+    },
+    {
+      "id": 4,
+      "name": "Tech Park Zone",
+      "coordinates": [18.5578, 73.7845],
+      "traffic": 45,
+      "pollution": 38,
+      "power_usage": 85,
+      "water_use": 40,
+      "complaints": 19
+    },
+    {
+      "id": 5,
+      "name": "Riverbank Residential",
+      "coordinates": [18.531, 73.865],
+      "traffic": 29,
+      "pollution": 33,
+      "power_usage": 55,
+      "water_use": 70,
+      "complaints": 8
+    }
+  ]
+}
