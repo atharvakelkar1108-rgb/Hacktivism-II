@@ -9,7 +9,7 @@ from contextlib import closing
 import os
 
 app = Flask(__name__)
-app.secret_key = 'REMOVED_SECRET_KEY'
+app.secret_key = os.environ.get('SECRET_KEY', 'new_random_key_2026')
 
 @app.after_request
 def after_request(response):
